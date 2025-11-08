@@ -46,7 +46,7 @@ def estimator(images):
                 R, _ = cv2.Rodrigues(rvec)   # Convert rod. vector → rotation matrix (3x3)
                 t = tvec.reshape(3,1)        # Ensure column shape (3x1)
 
-                # Build the 3x4 extrinsic matrix [R | t]
+                #switch from world -> camera to camera -> world
                 ex = np.hstack((R, t))
                 extrinsic.append(ex)
                 R_wc = R.T

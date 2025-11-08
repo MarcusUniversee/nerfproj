@@ -3,3 +3,4 @@ venv
 object_imgs
 website_imgs
 headphone_data.npz
+lego_200x200.npz
