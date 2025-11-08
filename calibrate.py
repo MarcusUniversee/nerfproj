@@ -40,10 +40,23 @@ def get_corners(image):
         #   - each element is a numpy array of shape (1, 4, 2) containing the 4 corner coordinates (x, y)
         # ids: numpy array of shape (N, 1) containing the tag IDs for each detected marker
         # Example: if 3 tags detected, corners will be a list of 3 arrays, ids will be shape (3, 1)
+        image_d = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
         for i in range(len(ids)):
             id = int(ids[i, 0])
             if 0 <= id < 6:
                 found[id] = corners[i].reshape(4, 2).astype(np.float32)
+        for i, pts in enumerate(corners):
+            pts = pts.reshape(4, 2).astype(int)
+            cv2.polylines(image_d, [pts], isClosed=True, color=(0, 255, 0), thickness=5)
+            
+            # draw the ID number in red (or any color you want)
+            x, y = pts[0]
+            cv2.putText(image_d, str(int(ids[i, 0])), (x, y - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2, cv2.LINE_AA)
+            
+        cv2.imshow("images with points", cv2.resize(image_d, (1280, 700)))
+        cv2.waitKey(1)
+        
         return found
     else:
         # No tags detected in this image, skip it
@@ -83,15 +96,21 @@ if __name__ == "__main__":
     folder = "./calibration_imgs"
     images = []
     print(f"progress: {0}")
+    count = 0
     for filename in os.listdir(folder):
         if filename.endswith(".png"):
             path = os.path.join(folder, filename)
             images.append(cv2.imread(path, cv2.IMREAD_GRAYSCALE))
+            count += 1
+        if count == 1:
+            break
     print(f"progress: {0.04}")
     retval, K, dist, rvecs, tvecs = calibrate(images)
+    h, w = images[0].shape[:2]
+    print("image size:", w, h)
     
-    with open("output.txt", "w") as file:
-        # Write the string representation of the variable to the file
-        file.write(f"Error= {retval}")
-        file.write(f"K= {K}")
-        file.write(f"distortion= {dist}")
+    # with open("output.txt", "w") as file:
+    #     # Write the string representation of the variable to the file
+    #     file.write(f"Error= {retval}")
+    #     file.write(f"K= {K}")
+    #     file.write(f"distortion= {dist}")
